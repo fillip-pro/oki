@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 
-	"gitlab.com/fillip/oki/providers/do"
+	cloudflare "gitlab.com/fillip/oki/providers/cloudflare"
+	do "gitlab.com/fillip/oki/providers/do"
 )
 
 func main() {
+	do, _ := do.DigitalOceanClient()
 	account, err := do.Account()
 
 	if account != nil {
@@ -37,9 +39,38 @@ func main() {
 
 	if droplets != nil && len(droplets) > 0 {
 		for _, droplet := range droplets {
-			fmt.Printf("Found droplet: %s", droplet.Name)
+			fmt.Printf("Found droplet: %s\n", droplet.Name)
 		}
 	} else {
 		fmt.Println("No droplets found")
 	}
+
+	cloudflare, err := cloudflare.CloudflareClient()
+	zones, err := cloudflare.ListZones()
+
+	if zones != nil && len(zones) > 0 {
+
+		for _, zone := range zones {
+			fmt.Printf("Found zone: %s\n", zone.Name)
+		}
+	} else {
+		fmt.Println("No zones found")
+	}
+
+	zone, err := cloudflare.GetZone("fillip.pro")
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	dns, err := cloudflare.ListDNSRecords(zone)
+
+	for _, r := range dns {
+		fmt.Printf("%s: %s\n", r.Name, r.Content)
+	}
+
+	storage, _ := NewStorage()
+	storage.CreatePrimaryStorage()
+
+	do.ListVolumes()
 }

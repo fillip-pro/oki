@@ -58,7 +58,7 @@ done.
 Firstly, the `$GOPATH` environment variable was setup 
 (on macOS) to point to a root workspace folder, like so:
 
-`export GOPATH=/myworkspace/oki`
+`export GOPATH=/[myworkspace]/oki`
 
 Underneath `oki, is `bin`, `pkg`, and `src`. Underneath
 `src` is the repository root (i.e. `gitlab.com`), underneath

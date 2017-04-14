@@ -1,11 +1,11 @@
-package do
+package providers
 
 import (
 	"github.com/digitalocean/godo"
 )
 
 // CreateDroplet creates a cluster droplet.
-func CreateDroplet() {
+func (digitalocean *DigitalOcean) CreateDroplet() {
 	createRequest := &godo.DropletCreateRequest{
 		Name:              "eu-cluster-1.fillip.pro",
 		Region:            "ams3",
@@ -18,13 +18,13 @@ func CreateDroplet() {
 		},
 	}
 
-	ctx, client, err := NewContext()
+	client, err := DigitalOceanClient()
 
 	if err != nil {
 
 	}
 
-	_, _, err = client.Droplets.Create(ctx, createRequest)
+	_, _, err = client.client.Droplets.Create(client.context, createRequest)
 
 	if err != nil {
 
@@ -32,19 +32,19 @@ func CreateDroplet() {
 }
 
 // ListDropletsByTag lists droplets by a given tag.
-func ListDropletsByTag(tag string) ([]godo.Droplet, error) {
+func (digitalocean *DigitalOcean) ListDropletsByTag(tag string) ([]godo.Droplet, error) {
 	opt := &godo.ListOptions{
 		Page:    1,
 		PerPage: 200,
 	}
 
-	ctx, client, err := NewContext()
+	client, err := DigitalOceanClient()
 
 	if err != nil {
 
 	}
 
-	droplets, _, err := client.Droplets.ListByTag(ctx, tag, opt)
+	droplets, _, err := client.client.Droplets.ListByTag(client.context, tag, opt)
 
 	return droplets, err
 }
