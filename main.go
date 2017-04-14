@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
 
+	"gitlab.com/fillip/oki/composer"
 	cloudflare "gitlab.com/fillip/oki/providers/cloudflare"
 	do "gitlab.com/fillip/oki/providers/do"
 )
@@ -69,8 +71,15 @@ func main() {
 		fmt.Printf("%s: %s\n", r.Name, r.Content)
 	}
 
-	storage, _ := NewStorage()
-	storage.CreatePrimaryStorage()
+	storage, _ := composer.NewStorage()
+	volume, err := storage.CreatePrimaryStorage()
 
-	do.ListVolumes()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if volume != nil {
+		volume, err = storage.DestroyPrimaryStorage(volume)
+		fmt.Printf("%s volume deleted.\n", volume.Name)
+	}
 }

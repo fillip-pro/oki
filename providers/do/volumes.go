@@ -67,3 +67,17 @@ func (digitalocean DigitalOcean) CreateVolumeByName(name string) (*godo.Volume, 
 
 	return volume, err
 }
+
+// DeleteVolumeByName finds a named volume and deletes it from
+// Digital Ocean.
+func (digitalocean DigitalOcean) DeleteVolumeByID(id string) error {
+	doc, err := DigitalOceanClient()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = doc.client.Storage.DeleteVolume(doc.context, id)
+
+	return err
+}
