@@ -2,12 +2,13 @@ package do
 
 import (
 	"context"
+	"os"
 
 	"github.com/digitalocean/godo"
 	"golang.org/x/oauth2"
 )
 
-var pat = "3719c85afcc0f16d380d0b10431f7f6fc6988dbb30de047d7aeeb7aa4e6ecfc4"
+var pat = os.Getenv("DO_TOKEN")
 
 // TokenSource provides the `AccessToken` for OAuth2 requests
 // at Digital Ocean.

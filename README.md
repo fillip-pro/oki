@@ -22,6 +22,25 @@ One instantiated, `Oki` will place itself within the
 infrastructure and become the conductor, ensuring 
 efficient uptime and effective scaling.
 
+## Running
+In order to run `Oki` you will need to configure your
+environment variables for the cloud providers you 
+intend to operate with:
+
+ - Amazon: `AWS_TOKEN`
+ - Azure: `AZURE_TOKEN`
+ - Digital Ocean: `DO_TOKEN`
+ - Google Compute: `GC_TOKEN`
+
+Rather than using something like Terraform or Packer,
+this project uses the SDKs provided by each of the above
+to directly provision the clustered environment. Therefore
+each provider-specific setup can be tuned and tailored, 
+and the skills required to do that are in the `Go` 
+programming language and the provider's platform. No
+esoteric third-party tooling exists to complicate the 
+setup.
+
 ## Development
 `Oki` is almost entirely a Golang program and as such
 it comes with all of the painpoints of programming in Go.
