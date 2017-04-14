@@ -41,6 +41,12 @@ programming language and the provider's platform. No
 esoteric third-party tooling exists to complicate the 
 setup.
 
+Once the tokens have been set, then you can run the 
+program using `make`. Because that's how hipsters roll
+on the toolchain. `make run` will build and run `Oki`, 
+checking for any provider tokens set, and configuring
+the cloud environment as coded.
+
 ## Development
 `Oki` is almost entirely a Golang program and as such
 it comes with all of the painpoints of programming in Go.
