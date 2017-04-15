@@ -11,7 +11,7 @@ var volume = &composer.Volume{}
 
 func TestStoragePrimaryStorage(t *testing.T) {
 	t.Run("Primary Storage", func(t *testing.T) {
-		t.Run("Activate Primary Storage", isPrimaryStorageActivatingTest)
+		t.Run("Activate Primary Storage", PrimaryStorageActivationTest)
 	})
 
 	if volume != nil {
@@ -25,7 +25,7 @@ func TestStoragePrimaryStorage(t *testing.T) {
 	}
 }
 
-func isPrimaryStorageActivatingTest(t *testing.T) {
+func PrimaryStorageActivationTest(t *testing.T) {
 	storage, err := composer.NewStorage()
 
 	if err != nil {
@@ -38,7 +38,10 @@ func isPrimaryStorageActivatingTest(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if volume != nil {
+	if volume != nil && len(volume.ID) != 0 {
 		t.Logf("%s storage volume created.", volume.ID)
+	} else {
+		t.Errorf("Could not validate successful primary storage volume creation.")
+		t.FailNow()
 	}
 }

@@ -7,42 +7,42 @@ import (
 	do "gitlab.com/fillip/oki/providers/do"
 )
 
-// Storage provides details of current storage state for `Oki`.
-type Storage struct {
+// StorageComposer provides details of current storage state for `Oki`.
+type StorageComposer struct {
 }
 
-// Volume describes a generic storage volume.
-type Volume struct {
+// Storage describes a generic storage volume.
+type Storage struct {
 	ID   string
 	Name string
 	Size int64
 }
 
-// NewStorage creates a new storage object.
-func NewStorage() (*Storage, error) {
-	storage := &Storage{}
+// NewStorageComposer creates a new storage object.
+func NewStorageComposer() (*StorageComposer, error) {
+	storageComposer := &StorageComposer{}
 
-	return storage, nil
+	return storageComposer, nil
 }
 
 // CreatePrimaryStorage creates primary storage volumes suitable for
 // project.
-func (storage Storage) CreatePrimaryStorage() (*Volume, error) {
+func (storageComposer StorageComposer) CreatePrimaryStorage() (*Storage, error) {
 	doc, err := do.DigitalOceanClient()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	volume, err := doc.CreateVolumeByName("eu-volume-01-fillip-pro")
+	volume, err := doc.CreateVolumeByName("eu-volume-1-fillip-pro")
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Volume '%s' created!", volume.ID)
+	fmt.Printf("Volume '%s' created!\n", volume.ID)
 
-	response := &Volume{
+	response := &Storage{
 		ID:   volume.ID,
 		Name: volume.Name,
 		Size: volume.SizeGigaBytes,
@@ -53,14 +53,24 @@ func (storage Storage) CreatePrimaryStorage() (*Volume, error) {
 
 // DestroyPrimaryStorage deletes the primary registered storage
 // volume.
-func (storage Storage) DestroyPrimaryStorage(volume *Volume) (*Volume, error) {
+func (storageComposer StorageComposer) DestroyPrimaryStorage(storage *Storage) (*Storage, error) {
 	doc, err := do.DigitalOceanClient()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = doc.DeleteVolumeByID(volume.ID)
+	err = doc.DeleteVolumeByID(storage.ID)
 
-	return volume, err
+	return storage, err
+}
+
+func (storageComposer StorageComposer) DetachStorage(storage *Storage) {
+	doc, err := do.DigitalOceanClient()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = doc.DetachVolume(storage.ID)
 }

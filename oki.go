@@ -71,15 +71,25 @@ func main() {
 		fmt.Printf("%s: %s\n", r.Name, r.Content)
 	}
 
-	storage, _ := composer.NewStorage()
-	volume, err := storage.CreatePrimaryStorage()
+	storageComposer, _ := composer.NewStorageComposer()
+	storage, err := storageComposer.CreatePrimaryStorage()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if volume != nil {
-		volume, err = storage.DestroyPrimaryStorage(volume)
-		fmt.Printf("%s volume deleted.\n", volume.Name)
+	clusterComposer, _ := composer.NewClusterComposer()
+	cluster, err := clusterComposer.CreatePrimaryCluster()
+
+	if storage != nil && cluster != nil {
+		clusterComposer.AttachStorageToCluster(storage, cluster)
+		fmt.Printf("%s storage attached to %s cluster\n", storage.Name, cluster.Name)
+		storageComposer.DetachStorage(storage)
+		fmt.Printf("%s storage detached\n", storage.Name)
+
+		storage, err = storageComposer.DestroyPrimaryStorage(storage)
+		fmt.Printf("%s storage deleted.\n", storage.Name)
+		err = clusterComposer.DestroyPrimaryCluster()
+		fmt.Printf("%s cluster deleted.\n", cluster.Name)
 	}
 }

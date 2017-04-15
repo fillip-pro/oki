@@ -7,6 +7,12 @@ import (
 	"github.com/digitalocean/godo"
 )
 
+// Volume describes the state of a storage volume
+// on Digital Ocean
+type Volume struct {
+	ID string
+}
+
 // ListVolumes lists volumes registed with Digital Ocean service.
 func (digitalocean DigitalOcean) ListVolumes() {
 	client, err := DigitalOceanClient()
@@ -68,7 +74,7 @@ func (digitalocean DigitalOcean) CreateVolumeByName(name string) (*godo.Volume, 
 	return volume, err
 }
 
-// DeleteVolumeByName finds a named volume and deletes it from
+// DeleteVolumeByID finds a named volume and deletes it from
 // Digital Ocean.
 func (digitalocean DigitalOcean) DeleteVolumeByID(id string) error {
 	doc, err := DigitalOceanClient()
@@ -78,6 +84,32 @@ func (digitalocean DigitalOcean) DeleteVolumeByID(id string) error {
 	}
 
 	_, err = doc.client.Storage.DeleteVolume(doc.context, id)
+
+	return err
+}
+
+// AttachVolumeToDroplet attaches a storage volume on Digital Ocean to a droplet.
+func (digitalocean DigitalOcean) AttachVolumeToDroplet(volumeID string, dropletID int) error {
+	doc, err := DigitalOceanClient()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, _, err = doc.client.StorageActions.Attach(doc.context, volumeID, dropletID)
+
+	return err
+}
+
+// DetachVolume detaches the volume from all clusters in Digital Ocean.
+func (digitalocean DigitalOcean) DetachVolume(volumeID string) error {
+	doc, err := DigitalOceanClient()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, _, err = doc.client.StorageActions.Detach(doc.context, volumeID)
 
 	return err
 }
