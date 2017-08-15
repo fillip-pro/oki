@@ -1,0 +1,21 @@
+[Unit]
+Description=etcd
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill etcd0
+ExecStartPre=-/usr/bin/docker rm etcd0
+ExecStartPre=/usr/bin/docker pull quay.io/coreos/etcd
+ExecStart=/usr/bin/docker run -d -v /usr/share/ca-certificates/:/etc/ssl/certs -p 4001:4001 -p 2380:2380 -p 2379:2379 \
+                            --name etcd quay.io/coreos/etcd \
+                            -name etcd0 \
+                            -advertise-client-urls http://${PRIVATE_IPV4}:2379,http://${PRIVATE_IPV4}:4001 \
+                            -listen-client-urls http://0.0.0.0:2379,http://0.0.0.0:4001 \
+                            -initial-advertise-peer-urls http://${PRIVATE_IPV4}:2380 \
+                            -listen-peer-urls http://0.0.0.0:2380 \
+                            -initial-cluster-token etcd-cluster-1 \
+                            -initial-cluster etcd0=http://${PRIVATE_IPV4}:2380 \
+                            -initial-cluster-state new
+ExecStop=/usr/bin/docker stop etcd0

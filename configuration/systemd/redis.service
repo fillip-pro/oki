@@ -1,0 +1,7 @@
+[Unit]
+Requires=flanneld.service
+After=flanneld.service
+
+[Service]
+ExecStart=/usr/bin/docker run redis
+Restart=always

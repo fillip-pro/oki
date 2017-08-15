@@ -1,7 +1,6 @@
 package providers
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/digitalocean/godo"
@@ -14,7 +13,7 @@ type Volume struct {
 }
 
 // ListVolumes lists volumes registed with Digital Ocean service.
-func (digitalocean DigitalOcean) ListVolumes() {
+func (digitalocean DigitalOcean) ListVolumes() ([]godo.Volume, error) {
 	client, err := DigitalOceanClient()
 
 	if err != nil {
@@ -27,23 +26,21 @@ func (digitalocean DigitalOcean) ListVolumes() {
 		log.Fatal(err)
 	}
 
-	for _, volume := range volumes {
-		fmt.Printf("Volume: %s\n", volume.ID)
-	}
+	return volumes, err
 }
 
-// GetVolumeByName retrieves a volume by a given name.
-func (digitalocean DigitalOcean) GetVolumeByName(name string) (*godo.Volume, error) {
+// GetVolume retrieves a volume by an ID.
+func (digitalocean DigitalOcean) GetVolume(id string) (*godo.Volume, error) {
 	doc, err := DigitalOceanClient()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	volume, _, err := doc.client.Storage.GetVolume(doc.context, name)
+	volume, _, err := doc.client.Storage.GetVolume(doc.context, id)
 
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
 	}
 
 	return volume, err
@@ -109,7 +106,7 @@ func (digitalocean DigitalOcean) DetachVolume(volumeID string) error {
 		log.Fatal(err)
 	}
 
-	_, _, err = doc.client.StorageActions.Detach(doc.context, volumeID)
+	_, err = doc.client.Storage.DeleteVolume(doc.context, volumeID)
 
 	return err
 }

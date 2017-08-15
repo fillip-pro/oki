@@ -1,9 +1,9 @@
 package composer
 
 import (
-	"fmt"
-	"log"
+	"time"
 
+	"gitlab.com/fillip/oki/log"
 	do "gitlab.com/fillip/oki/providers/do"
 )
 
@@ -26,25 +26,32 @@ func NewClusterComposer() (*ClusterComposer, error) {
 	return clusterComposer, nil
 }
 
-// CreatePrimaryCluster creates a primary cluster for the service.
-func (clusterComposer ClusterComposer) CreatePrimaryCluster() (*Cluster, error) {
-	doc, err := do.DigitalOceanClient()
+// Compose composes a new `Cluster` piece across the infrastructure
+// providers.
+func (clusterComposer ClusterComposer) Compose() {
+	cluster, _ := clusterComposer.createPrimaryCluster()
 
-	if err != nil {
-		log.Fatal(err)
+	if cluster != nil {
+		clusterComposer.attachStorageToCluster(cluster)
+		log.Infof("Storage attached to %s cluster\n", cluster.Name)
+		//_ = clusterComposer.destroyPrimaryCluster()
+		//fmt.Printf("%s cluster deleted.\n", cluster.Name)
 	}
+}
 
+// CreatePrimaryCluster creates a primary cluster for the service.
+func (clusterComposer ClusterComposer) createPrimaryCluster() (*Cluster, error) {
 	droplet := &do.Droplet{
 		Name: "eu-cluster-1.fillip.pro",
 		Tags: []string{"cluster"},
 	}
 
-	droplet, err = doc.CreateDroplet(droplet)
+	droplet, err := clients.DigitalOcean.CreateDroplet(droplet)
 
-	fmt.Printf("Cluster '%d' created!\n", droplet.ID)
+	log.Infof("Cluster '%d' created!\n", droplet.ID)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 
 	cluster := &Cluster{
@@ -57,25 +64,34 @@ func (clusterComposer ClusterComposer) CreatePrimaryCluster() (*Cluster, error) 
 }
 
 // DestroyPrimaryCluster destroys the primary cluster.
-func (clusterComposer ClusterComposer) DestroyPrimaryCluster() error {
-	doc, err := do.DigitalOceanClient()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = doc.DeleteDropletsByTag("cluster")
+func (clusterComposer ClusterComposer) destroyPrimaryCluster() error {
+	err := clients.DigitalOcean.DeleteDropletsByTag("cluster")
 
 	return err
 }
 
 // AttachStorageToCluster attaches volume storage to a cluster.
-func (clusterComposer ClusterComposer) AttachStorageToCluster(storage *Storage, cluster *Cluster) {
-	doc, err := do.DigitalOceanClient()
+func (clusterComposer ClusterComposer) attachStorageToCluster(cluster *Cluster) {
+	var id string
 
-	if err != nil {
-		log.Fatal(err)
+	for {
+		volumes, err := clients.DigitalOcean.ListVolumes()
+
+		if len(volumes) > 0 && err == nil {
+			for _, volume := range volumes {
+				if volume.Name == "eu-volume-1-fillip-pro" {
+					id = volume.ID
+					break
+				}
+			}
+		}
+
+		if len(id) > 0 {
+			break
+		}
+
+		time.Sleep(3000 * time.Millisecond)
 	}
 
-	doc.AttachVolumeToDroplet(storage.ID, cluster.ID)
+	clients.DigitalOcean.AttachVolumeToDroplet(id, cluster.ID)
 }

@@ -1,0 +1,98 @@
+ignition:
+  config:
+storage:
+  filesystems:
+    - name: local-storage
+      path: /
+    - name: prime-storage
+      mount:
+        device: /dev/disk/by-id/scsi-0DO_Volume_eu-volume-1-fillip-pro
+        format: ext4
+        create:
+          force: true
+          options:
+            - -b 4096
+  files:
+    - filesystem: local-storage
+      path:       /etc/motd
+      contents:
+        inline: "Welcome to Fillip.pro"
+      mode: 0644
+      user:
+        id: 0
+      group:
+        id: 0
+systemd:       
+  units:
+    - name: mnt-eu\x2dvolume\x2d1\x2dfillip\x2dpro.mount
+      enable: true
+      contents: |
+        [Mount]
+        What=/dev/disk/by-id/scsi-0DO_Volume_eu-volume-1-fillip-pro
+        Where=/mnt/eu-volume-1-fillip-pro
+        Type=ext4
+        [Install]
+        WantedBy=multi-user.target
+    - name: consul@.service
+      enable: true
+      contents: |
+        [Unit]
+        Description=Consul Service
+        After=etcd.service
+        [Service]
+        TimeoutStartSec=0
+        KillMode=none
+        EnvironmentFile=/etc/environment
+        ExecStartPre=-/usr/bin/docker kill consul%i
+        ExecStartPre=-/usr/bin/docker rm consul%i
+        ExecStartPre=/usr/bin/docker pull progrium/consul
+        ExecStartPre=/usr/bin/docker run -p 8400:8400 -p 8500:8500 -p 8600:53/udp --hostname consul%i --name consul%i progrium/consul -server -bootstrap -ui-dir /ui 
+        ExecStop=/usr/bin/docker stop consul%i
+    - name: vault@.service
+      enable: true
+      contents: |
+        [Unit]
+        Description=Vault Service
+        After=etcd.service
+        After=consul.service
+        After=docker.service
+        Requires=vault-discovery@%i.service
+        [Service]
+        TimeoutStartSec=0
+        KillMode=none
+        EnvironmentFile=/etc/environment
+        ExecStartPre=-/usr/bin/docker kill vault%i
+        ExecStartPre=-/usr/bin/docker rm vault%i
+        ExecStartPre=/usr/bin/docker pull sjourdan/vault
+        ExecStart=/usr/bin/docker run --cap-add IPC_LOCK --hostname vault%i --name vault%i --link consul:consul --volume $PWD/config:/config  -p ${PUBLIC_IPV4}:%i:8200 sjourdan/vault -config=/config/demo.hcl
+        ExecStop=/usr/bin/docker stop vault%i
+    - name: vault-discovery@.service
+      enable: true
+      contents: |
+        [Unit]
+        Description=Announce Vault@%i service
+        BindsTo=vault@%i.service
+        [Service]
+        EnvironmentFile=/etc/environment
+        ExecStart=/bin/sh -c "while true; do /usr/bin/etcdctl set /announce/services/vault%i ${PUBLIC_IPV4}:%i --ttl 60; sleep 45; done"
+        ExecStop=/usr/bin/etcdctl rm /announce/services/vault%i
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDMmc854l6Ir9ZTU7myTgnjxmu/NwVpv1l71WkjlmOXHrItxKjwLmI4a2Z1EZD/9T6LJpk4Bmj22FNCmXDZqy/jFJTNbJ2dA1DrCZvKX6+yVy6zIR/2Ecf+q/+72RSPoIl4cVIfP1idzbBbt/87vx/cjiO+aRCnboXYbWTYMzgN+KVBUxuly4RupCBoJ8N2Ed62f1eyOfLwL8dIjMxQHJpz7bA4qcnCS2V+hZZHdkVd1fEyxeV+MQ/cl0JakjV55UV66elBxEmWTbmbFMWs2GFj8lggPc24tueQrWFFzLROKtenUt2cQy02ajxtbv4f3EcsgwPCF1vEqNwZT+E0Vwl1 pjlaszkowicz@Wildcat.local"
+etcd:
+  version:                     3.0.15
+  discovery:                   "https://discovery.etcd.io/7d870d6980913c5a438365bb90c35452"
+  advertise_client_urls:       "http://{PRIVATE_IPV4}:2379,http://{PRIVATE_IPV4}:4001"
+  initial_advertise_peer_urls: "http://{PRIVATE_IPV4}:2380"
+  listen_client_urls:          "http://{PRIVATE_IPV4}:2379,http://{PRIVATE_IPV4}:4001"
+  listen_peer_urls:            "http://{PRIVATE_IPV4}:2380"
+  initial_cluster:             "http://{PRIVATE_IPV4}:2380"
+flannel:
+  version:        0.7.0
+  etcd_endpoints: "http://{PRIVATE_IPV4}:2380"
+update:
+  group:  "stable"
+locksmith:
+  reboot_strategy: "etcd-lock"

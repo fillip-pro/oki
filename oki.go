@@ -2,94 +2,117 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"sync"
 
 	"gitlab.com/fillip/oki/composer"
+	log "gitlab.com/fillip/oki/log"
 	cloudflare "gitlab.com/fillip/oki/providers/cloudflare"
 	do "gitlab.com/fillip/oki/providers/do"
 )
 
 func main() {
+	log.Infoln("Welcome to Oki")
+
+	//configuration.CloudConfig()
+	generateCluster()
+	providerStatus()
+}
+
+func providerStatus() {
+	doStatus()
+	cfStatus()
+}
+
+func doStatus() {
 	do, _ := do.DigitalOceanClient()
 	account, err := do.Account()
 
 	if account != nil {
-		fmt.Printf("Email: %s\n", account.Email)
-		fmt.Printf("Droplet Limit: %d\n", account.DropletLimit)
-		fmt.Printf("Floating IP Limit: %d\n", account.FloatingIPLimit)
+		log.Infof("Email: %s\n", account.Email)
+		log.Infof("Droplet Limit: %d\n", account.DropletLimit)
+		log.Infof("Floating IP Limit: %d\n", account.FloatingIPLimit)
 	}
 
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 
 	keys, err := do.ListKeys()
 
 	if keys != nil {
 		for _, key := range keys {
-			fmt.Printf("Found key: %s (%s)\n", key.Name, key.Fingerprint)
+			log.Infof("Found key: %s (%s)\n", key.Name, key.Fingerprint)
 		}
 	} else {
-		fmt.Println("No keys found")
+		log.Infoln("No keys found")
 	}
 
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 
 	droplets, err := do.ListDropletsByTag("cluster")
 
 	if droplets != nil && len(droplets) > 0 {
 		for _, droplet := range droplets {
-			fmt.Printf("Found droplet: %s\n", droplet.Name)
+			log.Infof("Found droplet: %s\n", droplet.Name)
 		}
 	} else {
-		fmt.Println("No droplets found")
+		log.Infoln("No droplets found")
 	}
+}
 
+func cfStatus() {
 	cloudflare, err := cloudflare.CloudflareClient()
 	zones, err := cloudflare.ListZones()
 
 	if zones != nil && len(zones) > 0 {
 
 		for _, zone := range zones {
-			fmt.Printf("Found zone: %s\n", zone.Name)
+			log.Infof("Found zone: %s\n", zone.Name)
 		}
 	} else {
-		fmt.Println("No zones found")
+		log.Infoln("No zones found")
 	}
 
 	zone, err := cloudflare.GetZone("fillip.pro")
 
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 
 	dns, err := cloudflare.ListDNSRecords(zone)
 
 	for _, r := range dns {
-		fmt.Printf("%s: %s\n", r.Name, r.Content)
+		log.Infof("%s: %s\n", r.Name, r.Content)
 	}
+}
 
-	storageComposer, _ := composer.NewStorageComposer()
-	storage, err := storageComposer.CreatePrimaryStorage()
+func generateCluster() {
+	messages := make(chan int)
+	var wg sync.WaitGroup
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	wg.Add(2)
 
-	clusterComposer, _ := composer.NewClusterComposer()
-	cluster, err := clusterComposer.CreatePrimaryCluster()
+	go func() {
+		defer wg.Done()
+		storageComposer, _ := composer.NewStorageComposer()
+		storageComposer.Compose()
+		messages <- 1
+	}()
 
-	if storage != nil && cluster != nil {
-		clusterComposer.AttachStorageToCluster(storage, cluster)
-		fmt.Printf("%s storage attached to %s cluster\n", storage.Name, cluster.Name)
-		storageComposer.DetachStorage(storage)
-		fmt.Printf("%s storage detached\n", storage.Name)
+	go func() {
+		defer wg.Done()
+		clusterComposer, _ := composer.NewClusterComposer()
+		clusterComposer.Compose()
+		messages <- 2
+	}()
 
-		storage, err = storageComposer.DestroyPrimaryStorage(storage)
-		fmt.Printf("%s storage deleted.\n", storage.Name)
-		err = clusterComposer.DestroyPrimaryCluster()
-		fmt.Printf("%s cluster deleted.\n", cluster.Name)
-	}
+	go func() {
+		for i := range messages {
+			fmt.Println(i)
+		}
+	}()
+
+	wg.Wait()
 }

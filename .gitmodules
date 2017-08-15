@@ -1,0 +1,6 @@
+[submodule "vendor/github.com/cloudflare/cloudflare-go"]
+	path = vendor/github.com/cloudflare/cloudflare-go
+	url = git@github.com:cloudflare/cloudflare-go.git
+[submodule "vendor/github.com/digitalocean/godo"]
+	path = vendor/github.com/digitalocean/godo
+	url = git@github.com:digitalocean/godo.git

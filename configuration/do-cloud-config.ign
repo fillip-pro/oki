@@ -1,0 +1,106 @@
+{
+  "ignition": {
+    "version": "2.0.0",
+    "config": {}
+  },
+  "storage": {
+    "filesystems": [
+      {
+        "name": "local-storage",
+        "path": "/"
+      },
+      {
+        "name": "prime-storage",
+        "mount": {
+          "device": "/dev/disk/by-id/scsi-0DO_Volume_eu-volume-1-fillip-pro",
+          "format": "ext4",
+          "create": {
+            "force": true,
+            "options": [
+              "-b 4096"
+            ]
+          }
+        }
+      }
+    ],
+    "files": [
+      {
+        "filesystem": "local-storage",
+        "path": "/etc/motd",
+        "contents": {
+          "source": "data:,Welcome%20to%20Fillip.pro",
+          "verification": {}
+        },
+        "mode": 420,
+        "user": {},
+        "group": {}
+      },
+      {
+        "filesystem": "root",
+        "path": "/etc/coreos/update.conf",
+        "contents": {
+          "source": "data:,GROUP%3Dstable%0AREBOOT_STRATEGY%3Detcd-lock",
+          "verification": {}
+        },
+        "mode": 420,
+        "user": {},
+        "group": {}
+      }
+    ]
+  },
+  "systemd": {
+    "units": [
+      {
+        "name": "etcd-member.service",
+        "enable": true,
+        "dropins": [
+          {
+            "name": "20-clct-etcd-member.conf",
+            "contents": "[Unit]\nRequires=coreos-metadata.service\nAfter=coreos-metadata.service\n\n[Service]\nEnvironmentFile=/run/metadata/coreos\nEnvironment=\"ETCD_IMAGE_TAG=v3.0.15\"\nExecStart=\nExecStart=/usr/lib/coreos/etcd-wrapper $ETCD_OPTS \\\n  --listen-peer-urls=\"http://${COREOS_DIGITALOCEAN_IPV4_PRIVATE_0}:2380\" \\\n  --listen-client-urls=\"http://${COREOS_DIGITALOCEAN_IPV4_PRIVATE_0}:2379,http://${COREOS_DIGITALOCEAN_IPV4_PRIVATE_0}:4001\" \\\n  --initial-advertise-peer-urls=\"http://${COREOS_DIGITALOCEAN_IPV4_PRIVATE_0}:2380\" \\\n  --initial-cluster=\"%m=http://${COREOS_DIGITALOCEAN_IPV4_PRIVATE_0}:2380\" \\\n  --advertise-client-urls=\"http://${COREOS_DIGITALOCEAN_IPV4_PRIVATE_0}:2379,http://${COREOS_DIGITALOCEAN_IPV4_PRIVATE_0}:4001\" \\\n  --discovery=\"https://discovery.etcd.io/7d870d6980913c5a438365bb90c35452\""
+          }
+        ]
+      },
+      {
+        "name": "flanneld.service",
+        "enable": true,
+        "dropins": [
+          {
+            "name": "20-clct-flannel.conf",
+            "contents": "[Unit]\nRequires=coreos-metadata.service\nAfter=coreos-metadata.service\n\n[Service]\nEnvironmentFile=/run/metadata/coreos\nEnvironment=\"FLANNEL_IMAGE_TAG=v0.7.0\"\nExecStart=\nExecStart=/usr/lib/coreos/flannel-wrapper $FLANNEL_OPTS \\\n  --etcd-endpoints=\"http://${COREOS_DIGITALOCEAN_IPV4_PRIVATE_0}:2380\""
+          }
+        ]
+      },
+      {
+        "name": "mnt-eu\\x2dvolume\\x2d1\\x2dfillip\\x2dpro.mount",
+        "enable": true,
+        "contents": "[Mount]\nWhat=/dev/disk/by-id/scsi-0DO_Volume_eu-volume-1-fillip-pro\nWhere=/mnt/eu-volume-1-fillip-pro\nType=ext4\n[Install]\nWantedBy=multi-user.target\n"
+      },
+      {
+        "name": "consul@.service",
+        "enable": true,
+        "contents": "[Unit]\nDescription=Consul Service\nAfter=etcd.service\n[Service]\nTimeoutStartSec=0\nKillMode=none\nEnvironmentFile=/etc/environment\nExecStartPre=-/usr/bin/docker kill consul%i\nExecStartPre=-/usr/bin/docker rm consul%i\nExecStartPre=/usr/bin/docker pull progrium/consul\nExecStartPre=/usr/bin/docker run -p 8400:8400 -p 8500:8500 -p 8600:53/udp --hostname consul%i --name consul%i progrium/consul -server -bootstrap -ui-dir /ui \nExecStop=/usr/bin/docker stop consul%i\n"
+      },
+      {
+        "name": "vault@.service",
+        "enable": true,
+        "contents": "[Unit]\nDescription=Vault Service\nAfter=etcd.service\nAfter=consul.service\nAfter=docker.service\nRequires=vault-discovery@%i.service\n[Service]\nTimeoutStartSec=0\nKillMode=none\nEnvironmentFile=/etc/environment\nExecStartPre=-/usr/bin/docker kill vault%i\nExecStartPre=-/usr/bin/docker rm vault%i\nExecStartPre=/usr/bin/docker pull sjourdan/vault\nExecStart=/usr/bin/docker run --cap-add IPC_LOCK --hostname vault%i --name vault%i --link consul:consul --volume $PWD/config:/config  -p ${PUBLIC_IPV4}:%i:8200 sjourdan/vault -config=/config/demo.hcl\nExecStop=/usr/bin/docker stop vault%i\n"
+      },
+      {
+        "name": "vault-discovery@.service",
+        "enable": true,
+        "contents": "[Unit]\nDescription=Announce Vault@%i service\nBindsTo=vault@%i.service\n[Service]\nEnvironmentFile=/etc/environment\nExecStart=/bin/sh -c \"while true; do /usr/bin/etcdctl set /announce/services/vault%i ${PUBLIC_IPV4}:%i --ttl 60; sleep 45; done\"\nExecStop=/usr/bin/etcdctl rm /announce/services/vault%i\n"
+      }
+    ]
+  },
+  "networkd": {},
+  "passwd": {
+    "users": [
+      {
+        "name": "core",
+        "sshAuthorizedKeys": [
+          "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDMmc854l6Ir9ZTU7myTgnjxmu/NwVpv1l71WkjlmOXHrItxKjwLmI4a2Z1EZD/9T6LJpk4Bmj22FNCmXDZqy/jFJTNbJ2dA1DrCZvKX6+yVy6zIR/2Ecf+q/+72RSPoIl4cVIfP1idzbBbt/87vx/cjiO+aRCnboXYbWTYMzgN+KVBUxuly4RupCBoJ8N2Ed62f1eyOfLwL8dIjMxQHJpz7bA4qcnCS2V+hZZHdkVd1fEyxeV+MQ/cl0JakjV55UV66elBxEmWTbmbFMWs2GFj8lggPc24tueQrWFFzLROKtenUt2cQy02ajxtbv4f3EcsgwPCF1vEqNwZT+E0Vwl1 pjlaszkowicz@Wildcat.local"
+        ]
+      }
+    ]
+  }
+}

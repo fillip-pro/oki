@@ -2,9 +2,8 @@ package providers
 
 import (
 	"errors"
-
 	"fmt"
-
+	"io/ioutil"
 	"time"
 
 	"github.com/digitalocean/godo"
@@ -19,13 +18,16 @@ type Droplet struct {
 
 // CreateDroplet creates a cluster droplet.
 func (digitalocean *DigitalOcean) CreateDroplet(droplet *Droplet) (*Droplet, error) {
+	ignitionConfig, err := ioutil.ReadFile("/Users/pjlaszkowicz/Workspaces/Fillip/oki/src/gitlab.com/fillip/oki/configuration/do-cloud-config.ign")
+
 	createRequest := &godo.DropletCreateRequest{
 		Name:              droplet.Name,
-		Region:            "ams3",
+		Region:            "fra1",
 		Size:              "512mb",
 		PrivateNetworking: true,
 		IPv6:              true,
 		Tags:              droplet.Tags,
+		UserData:          string(ignitionConfig),
 		Image: godo.DropletCreateImage{
 			Slug: "coreos-stable",
 		},
@@ -55,7 +57,7 @@ func (digitalocean *DigitalOcean) CreateDroplet(droplet *Droplet) (*Droplet, err
 		}
 	}
 
-	fmt.Printf("Droplet %d is online!", dropletResponse.ID)
+	fmt.Printf("Droplet %d is online!\n", dropletResponse.ID)
 
 	droplet.ID = dropletResponse.ID
 

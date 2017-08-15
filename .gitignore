@@ -1,2 +1,5 @@
 # Development Tooling
 .vscode
+
+# Config Artifacts
+.public

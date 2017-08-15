@@ -1,0 +1,6 @@
+[Socket]
+ListenStream=2222
+FreeBind=true
+Accept=yes
+[Install]
+WantedBy=multi-user.target
