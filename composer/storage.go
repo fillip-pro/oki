@@ -25,7 +25,7 @@ func NewStorageComposer() (*StorageComposer, error) {
 
 // Compose composes a new `Storage` configuration for use.
 func (storageComposer StorageComposer) Compose() {
-	_, err := storageComposer.createPrimaryStorage()
+	_, err := storageComposer.CreatePrimaryStorage()
 
 	if err != nil {
 		log.Error(err)
@@ -42,7 +42,7 @@ func (storageComposer StorageComposer) Compose() {
 
 // CreatePrimaryStorage creates primary storage volumes suitable for
 // project.
-func (storageComposer StorageComposer) createPrimaryStorage() (*Storage, error) {
+func (storageComposer StorageComposer) CreatePrimaryStorage() (*Storage, error) {
 	doc, err := do.DigitalOceanClient()
 
 	if err != nil {
@@ -68,7 +68,7 @@ func (storageComposer StorageComposer) createPrimaryStorage() (*Storage, error) 
 
 // DestroyPrimaryStorage deletes the primary registered storage
 // volume.
-func (storageComposer StorageComposer) destroyPrimaryStorage(storage *Storage) (*Storage, error) {
+func (storageComposer StorageComposer) DestroyPrimaryStorage(storage *Storage) (*Storage, error) {
 	doc, err := do.DigitalOceanClient()
 
 	if err != nil {

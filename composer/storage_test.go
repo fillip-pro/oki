@@ -7,15 +7,15 @@ import (
 	"gitlab.com/fillip/oki/composer"
 )
 
-var volume = &composer.Volume{}
+var storage = &composer.StorageComposer{}
 
 func TestStoragePrimaryStorage(t *testing.T) {
 	t.Run("Primary Storage", func(t *testing.T) {
 		t.Run("Activate Primary Storage", PrimaryStorageActivationTest)
 	})
 
-	if volume != nil {
-		storage, err := composer.NewStorage()
+	if storage != nil {
+		volume, err := storage.CreatePrimaryStorage()
 
 		if err != nil {
 			log.Fatal(err)
@@ -26,7 +26,7 @@ func TestStoragePrimaryStorage(t *testing.T) {
 }
 
 func PrimaryStorageActivationTest(t *testing.T) {
-	storage, err := composer.NewStorage()
+	storage, err := composer.NewStorageComposer()
 
 	if err != nil {
 		t.Fatal(err)

@@ -29,7 +29,7 @@ func NewClusterComposer() (*ClusterComposer, error) {
 // Compose composes a new `Cluster` piece across the infrastructure
 // providers.
 func (clusterComposer ClusterComposer) Compose() {
-	cluster, _ := clusterComposer.createPrimaryCluster()
+	cluster, _ := clusterComposer.CreatePrimaryCluster()
 
 	if cluster != nil {
 		clusterComposer.attachStorageToCluster(cluster)
@@ -40,7 +40,7 @@ func (clusterComposer ClusterComposer) Compose() {
 }
 
 // CreatePrimaryCluster creates a primary cluster for the service.
-func (clusterComposer ClusterComposer) createPrimaryCluster() (*Cluster, error) {
+func (clusterComposer ClusterComposer) CreatePrimaryCluster() (*Cluster, error) {
 	droplet := &do.Droplet{
 		Name: "eu-cluster-1.fillip.pro",
 		Tags: []string{"cluster"},
@@ -64,7 +64,7 @@ func (clusterComposer ClusterComposer) createPrimaryCluster() (*Cluster, error) 
 }
 
 // DestroyPrimaryCluster destroys the primary cluster.
-func (clusterComposer ClusterComposer) destroyPrimaryCluster() error {
+func (clusterComposer ClusterComposer) DestroyPrimaryCluster() error {
 	err := clients.DigitalOcean.DeleteDropletsByTag("cluster")
 
 	return err
