@@ -10,6 +10,7 @@ variables:
 # repository in /go/src/mydomainperso.com/repos/projectname 
 # Thus, making a symbolic link corrects this.
 before_script:
+    - apk add --update bash wget ca-certificates openssl git tar
     - ln -s /builds /go/src/gitlab.com
     - cd /go/src/gitlab.com/fillip/oki
 
