@@ -3,9 +3,6 @@ image: golang:latest
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
-pre_build_script:
-    - apk add --update bash wget ca-certificates openssl git tar
-
 # The problem is that to be able to use go get, one needs to put
 # the repository in the $GOPATH. So for example if your gitlab domain
 # is mydomainperso.com, and that your repository is repos/projectname, and
@@ -13,6 +10,7 @@ pre_build_script:
 # repository in /go/src/mydomainperso.com/repos/projectname 
 # Thus, making a symbolic link corrects this.
 before_script:
+    - apk add --update bash wget ca-certificates openssl git tar
     - ln -s /builds /go/src/gitlab.com
     - cd /go/src/gitlab.com/fillip/oki
 
