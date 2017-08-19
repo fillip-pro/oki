@@ -1,4 +1,8 @@
-image: golang:latest
+image: golang:1.8
+
+stages:
+    - build
+    - test
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
@@ -14,18 +18,7 @@ before_script:
     - ln -s /builds /go/src/gitlab.com
     - cd /go/src/gitlab.com/fillip/oki
 
-stages:
-    - test
-    - build
-
-format:
-    stage: test
-    script:
-        #- go get github.com/alecthomas/kingpin
-        - go tool vet -composites=false -shadow=true *.go
-        - go test -race $(go list ./... | grep -v /vendor/)
-
-compile:
+build-binary:
     stage: build
     script:
         # Add here all the dependencies, or use glide/govendor/...
@@ -36,3 +29,15 @@ compile:
     artifacts:
         paths:
             - oki
+
+test-binary:
+    stage: test
+    script:
+        - make test
+
+#format:
+#    stage: test
+#    script:
+        #- go get github.com/alecthomas/kingpin
+#        - go tool vet -composites=false -shadow=true *.go
+#        - go test -race $(go list ./... | grep -v /vendor/)
