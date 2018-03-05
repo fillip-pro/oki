@@ -50,7 +50,7 @@
     "providers/cloudflare",
     "providers/do"
   ]
-  revision = "dc5341b40d167eb37e478bca8d650a67a78ee0f9"
+  revision = "bda7307f84528c524c464f0c66b0217b36713b04"
 
 [[projects]]
   branch = "master"
@@ -87,6 +87,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "143fe1328b5c8aeba0ba1ba48a61b9b0b86bfe6b2ac428fe246a0db088f73399"
+  inputs-digest = "ee8b9e03d8105f43a202b5dc21d82fc5d3458829ff3b3586c8a7aed95e0cdf39"
   solver-name = "gps-cdcl"
   solver-version = 1
