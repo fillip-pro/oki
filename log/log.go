@@ -8,40 +8,52 @@ import (
 )
 
 var (
-	TraceLogger   *log.Logger
-	InfoLogger    *log.Logger
+	// TraceLogger logs the stack trace messages.
+	TraceLogger *log.Logger
+	// InfoLogger logs informative (user readable) messages.
+	InfoLogger *log.Logger
+	// WarningLogger logs warning messages.
 	WarningLogger *log.Logger
-	ErrorLogger   *log.Logger
+	// ErrorLogger logs error messages.
+	ErrorLogger *log.Logger
 )
 
+// Tracef logs formatted trace messages.
 func Tracef(format string, values ...interface{}) {
 	TraceLogger.Printf(format, values...)
 }
 
+// Traceln logs trace messages.
 func Traceln(values ...interface{}) {
 	TraceLogger.Println(values...)
 }
 
+// Infof logs formatted information messages.
 func Infof(format string, values ...interface{}) {
 	InfoLogger.Printf(format, values...)
 }
 
+// Infoln logs information messages.
 func Infoln(values ...interface{}) {
 	InfoLogger.Println(values...)
 }
 
+// Warnf logs formatted warnings.
 func Warnf(format string, values ...interface{}) {
 	WarningLogger.Printf(format, values...)
 }
 
+// Warnln logs warnings.
 func Warnln(values ...interface{}) {
 	WarningLogger.Println(values...)
 }
 
+// Error logs fatal errors.
 func Error(values ...interface{}) {
 	ErrorLogger.Fatal(values)
 }
 
+// Errorf logs formatted fatam messages.
 func Errorf(format string, values ...interface{}) {
 	ErrorLogger.Fatalf(format, values)
 }

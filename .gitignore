@@ -1,5 +1,63 @@
-# Development Tooling
-.vscode
+### OSX ###
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
 
-# Config Artifacts
-.public
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+### Windows ###
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+### Linux ###
+.*
+!.gitignore
+*~
+
+### SublimeText ###
+# SublimeText project files
+*.sublime-workspace
+
+### Node ###
+lib-cov
+*.seed
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
+
+pids
+logs
+results
+
+npm-debug.log
+node_modules
+
+### Go ###
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+#*.o
+#*.a
+#*.so
+
+
+# Folders
+bin/
+vendor/
+
+#*.exe
