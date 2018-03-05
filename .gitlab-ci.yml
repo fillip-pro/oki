@@ -9,7 +9,7 @@ variables:
 
 before_script:
     # install ssh-agent
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - 'which ssh-agent || ( apk add --update --no-cache openssh-client )'
 
     # run ssh-agent
     - eval $(ssh-agent -s)
@@ -22,6 +22,7 @@ before_script:
     - mkdir -p ~/.ssh
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     - apk add --update bash wget ca-certificates openssl git tar
+    - go get github.com/tools/godep
     - ln -s /builds /go/src/gitlab.com
     - cd /go/src/gitlab.com/fillip/oki
 
