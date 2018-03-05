@@ -9,7 +9,7 @@ variables:
 
 before_script:
     # install ssh-agent
-    - 'which ssh-agent || ( apk add --update --no-cache openssh-client )'
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
 
     # run ssh-agent
     - eval $(ssh-agent -s)
@@ -21,7 +21,6 @@ before_script:
     # WARNING: use only in docker container, if you use it with shell you will overwrite your user's ssh config
     - mkdir -p ~/.ssh
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-    - apk add --update bash wget ca-certificates openssl git tar
     - go get github.com/tools/godep
     - ln -s /builds /go/src/gitlab.com
     - cd /go/src/gitlab.com/fillip/oki
