@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"sync"
 
-	"gitlab.com/fillip/oki/auth"
 	"gitlab.com/fillip/oki/cmd"
 	"gitlab.com/fillip/oki/composer"
 	log "gitlab.com/fillip/oki/log"
 	cloudflare "gitlab.com/fillip/oki/providers/cloudflare"
 	do "gitlab.com/fillip/oki/providers/do"
+	"gitlab.com/fillip/oki/shell"
 )
 
 func main() {
 	log.Infoln("Welcome to Oki")
 
-	log.Infoln(auth.GenerateKeys())
+	log.Infoln(shell.GenerateKeys())
 
 	cmd.Execute()
 
