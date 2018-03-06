@@ -1,4 +1,4 @@
-package configuration
+package config
 
 import (
 	"fmt"
@@ -6,6 +6,13 @@ import (
 	"path/filepath"
 	"strings"
 )
+
+// Config type for the app-wide configuration.
+type Config struct {
+	BuildVersion string `yaml:"-"`
+	BuildHash    string `yaml:"-"`
+	BuildTime    string `yaml:"-"`
+}
 
 // CloudConfig produces a base cloud-config.yml based on the initial template.
 func CloudConfig() {

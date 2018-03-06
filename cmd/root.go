@@ -7,6 +7,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	// Version of the build.
+	Version = "dev-master"
+	// BuildTime of the build.
+	BuildTime = "undefined"
+	// GitHash of the build.
+	GitHash = "undefined"
+)
+
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "oki",

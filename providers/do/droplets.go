@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"time"
 
 	"github.com/digitalocean/godo"
@@ -42,8 +43,10 @@ func (digitalocean *DigitalOcean) CreateDroplet(droplet *Droplet) (*Droplet, err
 	dropletResponse, _, err := client.client.Droplets.Create(client.context, createRequest)
 
 	if err != nil {
-
+		log.Fatal(err)
 	}
+
+	log.Printf("Droplet status is %s\n", dropletResponse.Status)
 
 	for dropletResponse.Status != "active" {
 		time.Sleep(3000 * time.Millisecond)
@@ -52,8 +55,8 @@ func (digitalocean *DigitalOcean) CreateDroplet(droplet *Droplet) (*Droplet, err
 
 		fmt.Printf("Waiting for %d to come online...\n", dropletResponse.ID)
 
-		for err != nil {
-
+		if err != nil {
+			log.Fatal(err)
 		}
 	}
 
