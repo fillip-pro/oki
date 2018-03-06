@@ -16,6 +16,7 @@ func main() {
 	log.Infoln("Welcome to Oki")
 
 	log.Infoln(shell.GenerateKeys())
+	shell.MakeSSHKeyPair("", "")
 
 	cmd.Execute()
 
