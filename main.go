@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"gitlab.com/fillip/oki/auth"
 	"gitlab.com/fillip/oki/cmd"
 	"gitlab.com/fillip/oki/composer"
 	log "gitlab.com/fillip/oki/log"
@@ -13,6 +14,8 @@ import (
 
 func main() {
 	log.Infoln("Welcome to Oki")
+
+	log.Infoln(auth.GenerateKeys())
 
 	cmd.Execute()
 
