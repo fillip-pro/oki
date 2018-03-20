@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"gitlab.com/fillip/oki/cmd"
 	"gitlab.com/fillip/oki/composer"
 	log "gitlab.com/fillip/oki/log"
 	cloudflare "gitlab.com/fillip/oki/providers/cloudflare"
@@ -12,6 +13,8 @@ import (
 
 func main() {
 	log.Infoln("Welcome to Oki")
+
+	cmd.Execute()
 
 	//configuration.CloudConfig()
 	generateCluster()

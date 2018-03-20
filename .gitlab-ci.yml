@@ -35,7 +35,7 @@ build:linux:
         - make
     artifacts:
         paths:
-            - oki
+            - bin
 
 test-binary:
     stage: test
